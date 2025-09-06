@@ -6,6 +6,11 @@
         <div class="py-lg-2">&nbsp;</div>
         <div class="row d-flex justify-content-center">
             <div class="col-md-5">
+                @if (session('success'))
+                <div class="alert alert-success flash-message">
+                    {{ session('success') }}
+                </div>
+                @endif
                 <div class="card shadow border-0 p-5">
                     <h1 class="h3">Register</h1>
                     <form action="" name="registrationForm" id="registrationForm">
@@ -43,30 +48,33 @@
 
 @section('customJs')
 <script>
-   $("#registrationForm").submit(function(e) {
-    e.preventDefault();
-    $("input").removeClass("is-invalid");
-    $("p").removeClass("invalid-feedback").html("");
-    $.ajax({
-        url: '{{ route("account.process.registration") }}',
-        type: 'post',
-        data: $("#registrationForm").serializeArray(),
-        dataType: 'json',
-        success: function(response) {
-            if (response.status == false) {
-                $.each(response.errors, function(key, value) {
-                    $("#" + key)
-                        .addClass("is-invalid")
-                        .siblings("p")
-                        .addClass("invalid-feedback")
-                        .html(value);
-                });
-            } else {
-                alert(response.message);
-                $("#registrationForm")[0].reset();
+    $("#registrationForm").submit(function(e) {
+        e.preventDefault();
+        $("input").removeClass("is-invalid");
+        $("p").removeClass("invalid-feedback").html("");
+        $.ajax({
+            url: '{{ route("account.process.registration") }}',
+            type: 'post',
+            data: $("#registrationForm").serializeArray(),
+            dataType: 'json',
+            success: function(response) {
+                if (response.status == false) {
+                    $.each(response.errors, function(key, value) {
+                        $("#" + key)
+                            .addClass("is-invalid")
+                            .siblings("p")
+                            .addClass("invalid-feedback")
+                            .html(value);
+                    });
+                } else {
+                    window.location.href = response.redirect; // redirect after success
+                }
             }
-        }
-    })
-});
+        })
+    });
+    // Auto hide flash messages after 2 seconds
+    setTimeout(function() {
+        $(".flash-message").fadeOut("slow");
+    }, 2000);
 </script>
 @endsection

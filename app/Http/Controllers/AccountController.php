@@ -24,14 +24,21 @@ class AccountController extends Controller
             'confirm_password' => 'required',
         ]);
         if ($validator->fails()) {
-            return response()->json(['status' => false,'errors' => $validator->errors(),404]);
-        }
-            User::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'password' => bcrypt($request->password),
+            return response()->json([
+                'status' => false,
+                'errors' => $validator->errors()
             ]);
-        return response()->json(['status' => true,'message' => 'Registration successful!',200]);
+        }
+        $user = new User();
+        $user->name = $request->name;
+        $user->email = $request->email;
+        $user->password = bcrypt($request->password);
+        $user->save();
+        session()->flash('success', 'Registration successful! You can login now.');
+        return response()->json([
+            'status' => true,
+            'redirect' => route('account.registration')
+        ]);
     }
     //This is Login Function
     public function loginPage()
@@ -39,5 +46,26 @@ class AccountController extends Controller
         return view('front.account.login');
     }
 
-    
+    //This is Process Login Function
+    public function processLogin(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
+        if ($validator->fails()) {
+            return redirect()->route('account.login')->withErrors($validator)->withInput($request->only('email'));
+        }
+        if (auth()->attempt(['email' => $request->email, 'password' => $request->password])) {
+            return redirect()->route('account.profile')->with('success', 'Login successful!');
+        } else {
+            return redirect()->route('account.login')->withErrors(['email' => 'Invalid email or password'])->withInput($request->only('email'));
+        }
+    }
+
+    //This is Profile Function
+    public function profilePage()
+    {
+        echo "Profile Page";
+    }
 }
