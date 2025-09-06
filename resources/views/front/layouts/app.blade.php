@@ -32,7 +32,19 @@
                             <a class="nav-link" aria-current="page" href="jobs.html">Find Jobs</a>
                         </li>
                     </ul>
-                    <a class="btn btn-outline-primary me-2" href="{{ route('account.login') }}" type="submit">Login</a>
+                    <!-- @guest
+                        {{-- Show when user is NOT logged in --}}
+                        <a class="btn btn-outline-primary me-2" href="{{ route('account.login') }}">Login</a>
+                    @endguest
+                    @auth
+                        {{-- Show when user IS logged in --}}
+                        <a class="btn btn-outline-primary me-2" href="#">My Account</a>
+                    @endauth -->
+                    @if(!Auth::check())
+                        <a class="btn btn-outline-primary me-2" href="{{ route('account.login') }}">Login</a>
+                        @else
+                        <a class="btn btn-outline-primary me-2" href="">My Account</a>
+                    @endif
                     <a class="btn btn-primary" href="post-job.html" type="submit">Post a Job</a>
                 </div>
             </div>

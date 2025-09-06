@@ -66,6 +66,36 @@ class AccountController extends Controller
     //This is Profile Function
     public function profilePage()
     {
-        echo "Profile Page";
+        $id = auth()->user()->id;
+        $user = User::where('id', $id)->first();
+        return view('front.account.profile',['user'=>$user]);
+    }
+
+    //This is Edit Profile Function 
+    public function updateProfile(Request $request)
+    {
+        $user = auth()->user();
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'designation' => 'nullable|string|max:255',
+            'mobile' => 'nullable|string|max:20',
+        ]);
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'errors' => $validator->errors()
+            ], 422);
+        }
+        $user->update($request->only('name','email','designation','mobile'));
+        session()->flash('success', 'Profile updated successfully!');
+        return response()->json(['status' => true]);
+    }
+    
+    //This is Logout Function
+    public function logout()
+    {
+        auth()->logout();
+        return redirect()->route('account.login');
     }
 }
