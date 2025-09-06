@@ -14,6 +14,7 @@ class AccountController extends Controller
         return view('front.account.registration');
     }
 
+    //This is Process Registration Function
     public function processRgistration(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -31,6 +32,11 @@ class AccountController extends Controller
                 'password' => bcrypt($request->password),
             ]);
         return response()->json(['status' => true,'message' => 'Registration successful!',200]);
+    }
+    //This is Login Function
+    public function loginPage()
+    {
+        return view('front.account.login');
     }
 
     
