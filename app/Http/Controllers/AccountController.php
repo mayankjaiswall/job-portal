@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
@@ -112,6 +113,25 @@ class AccountController extends Controller
         return response()->json(['status' => true,'message' => 'Password updated successfully!']);
     }
     
+    //This is Profile Picture Update Function
+    public function profilePicUpdate(Request $request)
+    {
+        $request->validate([
+            'image' => 'required|image|mimes:jpg,jpeg,png,gif|max:2048',
+        ]);
+        $user = Auth::user();
+        if ($user->image && file_exists(public_path($user->image))) {
+            unlink(public_path($user->image));
+        }
+        $fileName = time() . '.' . $request->image->extension();
+        $filePath = 'uploads/profile/' . $fileName;
+        $request->image->move(public_path('uploads/profile'), $fileName);
+        $user->image = $filePath;
+        $user->save();
+
+        return back()->with('success', 'Profile picture updated successfully!');
+    }
+
     //This is Logout Function
     public function logout()
     {
