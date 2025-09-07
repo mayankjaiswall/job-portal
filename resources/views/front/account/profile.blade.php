@@ -57,21 +57,26 @@
                 <div class="card border-0 shadow mb-4">
                     <div class="card-body p-4">
                         <h3 class="fs-4 mb-1">Change Password</h3>
-                        <div class="mb-4">
-                            <label for="" class="mb-2">Old Password*</label>
-                            <input type="password" placeholder="Old Password" class="form-control">
-                        </div>
-                        <div class="mb-4">
-                            <label for="" class="mb-2">New Password*</label>
-                            <input type="password" placeholder="New Password" class="form-control">
-                        </div>
-                        <div class="mb-4">
-                            <label for="" class="mb-2">Confirm Password*</label>
-                            <input type="password" placeholder="Confirm Password" class="form-control">
-                        </div>
-                    </div>
-                    <div class="card-footer  p-4">
-                        <button type="button" class="btn btn-primary">Update</button>
+                        <form id="passwordForm">
+                            @csrf
+                            <div class="mb-4">
+                                <label for="old_password" class="mb-2">Old Password*</label>
+                                <input type="password" name="old_password" id="old_password" placeholder="Old Password" class="form-control">
+                                <p id="oldPasswordError" class="text-danger"></p>
+                            </div>
+                            <div class="mb-4">
+                                <label for="new_password" class="mb-2">New Password*</label>
+                                <input type="password" name="new_password" id="new_password" placeholder="New Password" class="form-control">
+                                <p id="newPasswordError" class="text-danger"></p>
+                            </div>
+                            <div class="mb-4">
+                                <label for="new_password_confirmation" class="mb-2">Confirm Password*</label>
+                                <input type="password" name="new_password_confirmation" id="new_password_confirmation" placeholder="Confirm Password" class="form-control">
+                                <p id="confirmPasswordError" class="text-danger"></p>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Update</button>
+                        </form>
+                        <div class="mt-3" id="passwordMessage"></div>
                     </div>
                 </div>
             </div>
@@ -124,6 +129,41 @@ $(document).ready(function() {
     setTimeout(() => {
         $('.flash-message').fadeOut('slow', function(){ $(this).remove(); });
     }, 2000);
+});
+
+//Password Change Form
+$('#passwordForm').on('submit', function(e) {
+    e.preventDefault();
+    $('#oldPasswordError').text('');
+    $('#newPasswordError').text('');
+    $('#confirmPasswordError').text('');
+    $('#passwordMessage').html('');
+    $.ajax({
+        url: "{{ route('account.change.password') }}",
+        type: "POST",
+        data: $(this).serialize(),
+        success: function(response) {
+            if (response.status) {
+                $('#passwordMessage').html('<div class="alert alert-success">' + response.message + '</div>');
+                $('#passwordForm')[0].reset();
+                setTimeout(() => { $('#passwordMessage').fadeOut('slow'); }, 2000);
+            }
+        },
+        error: function(xhr) {
+            if (xhr.status === 422) {
+                let errors = xhr.responseJSON.errors;
+                if (errors.old_password) {
+                    $('#oldPasswordError').text(errors.old_password[0]);
+                }
+                if (errors.new_password) {
+                    $('#newPasswordError').text(errors.new_password[0]);
+                }
+                if (errors.new_password_confirmation) {
+                    $('#confirmPasswordError').text(errors.new_password_confirmation[0]);
+                }
+            }
+        }
+    });
 });
 </script>
 @endsection

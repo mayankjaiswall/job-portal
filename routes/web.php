@@ -33,5 +33,6 @@ Route::group(['account'],function(){
         Route::get('/account/profile',[AccountController::class,'profilePage'])->name('account.profile');
         Route::get('/account/logout',[AccountController::class,'logout'])->name('account.logout');
         Route::post('/account/update-profile',[AccountController::class,'updateProfile'])->name('account.update.profile');
+        Route::post('/account/change-password', [AccountController::class, 'changePassword'])->name('account.change.password');
     });
 });

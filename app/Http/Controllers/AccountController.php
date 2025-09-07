@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
 class AccountController extends Controller
@@ -90,6 +91,25 @@ class AccountController extends Controller
         $user->update($request->only('name','email','designation','mobile'));
         session()->flash('success', 'Profile updated successfully!');
         return response()->json(['status' => true]);
+    }
+
+    //This is Change Password Function
+    public function changePassword(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'old_password' => 'required',
+            'new_password' => 'required|min:6|confirmed',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['status' => false,'errors' => $validator->errors()], 422);
+        }
+        $user = auth()->user();
+        if (!Hash::check($request->old_password, $user->password)) {
+            return response()->json(['status' => false,'errors' => ['old_password' => ['Old password does not match']]], 422);
+        }
+        $user->password = Hash::make($request->new_password);
+        $user->save();
+        return response()->json(['status' => true,'message' => 'Password updated successfully!']);
     }
     
     //This is Logout Function
